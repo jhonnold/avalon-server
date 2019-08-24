@@ -1,10 +1,12 @@
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
+const basicAuth = require('express-basic-auth');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const authorizer = require('./auth');
 const store = require('./store');
 const { registerUser, disconnectUser } = require('./ducks/users');
 
@@ -29,6 +31,7 @@ app.use(morgan('dev'));
 app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 
+app.use(basicAuth({ authorizer }));
 app.use((_, res, next) => {
   res.io = io;
   next();
