@@ -6,12 +6,11 @@ module.exports = (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).send('name required');
 
-  const id = shortid.generate();
+  const roomId = shortid.generate();
 
-  store.dispatch(createRoom(id, name, req.user.id));
+  store.dispatch(createRoom(roomId, name, req.user.id));
 
-  const room = store.getState().rooms[id];
-
+  const room = store.getState().rooms[roomId];
   res.io.emit('room created', room);
-  res.status(201).send(room);
+  res.sendStatus(201);
 };

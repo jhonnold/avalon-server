@@ -1,6 +1,7 @@
 const CREATE_ROOM = '@avalon/rooms/CREATE_ROOM';
 const DELETE_ROOM = '@avalon/rooms/DELETE_ROOM';
 const JOIN_ROOM = '@avalon/rooms/JOIN_ROOM';
+const LEAVE_ROOM = '@avalon/rooms/LEAVE_ROOM';
 
 const initialState = {};
 const reducer = (state = initialState, action) => {
@@ -28,6 +29,16 @@ const reducer = (state = initialState, action) => {
         },
       };
     }
+    case LEAVE_ROOM: {
+      const currentUsers = state[payload.roomId].users;
+      return {
+        ...state,
+        [payload.roomId]: {
+          ...state[payload.roomId],
+          users: currentUsers.filter(id => id !== payload.userId),
+        },
+      }; 
+    }
     default: {
       return state;
     }
@@ -46,6 +57,11 @@ reducer.deleteRoom = roomId => ({
 
 reducer.joinRoom = (roomId, userId) => ({
   type: JOIN_ROOM,
+  payload: { roomId, userId },
+});
+
+reducer.leaveRoom = (roomId, userId) => ({
+  type: LEAVE_ROOM,
   payload: { roomId, userId },
 });
 
