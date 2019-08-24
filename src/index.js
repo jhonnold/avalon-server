@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const store = require('./store');
-const { registerUser } = require('./ducks/users');
+const { registerUser, disconnectUser } = require('./ducks/users');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,8 +19,11 @@ io.on('connect', client => {
     store.dispatch(registerUser(name, client.id));
     client.emit('handshake completed', client.id);
   }
-});
 
+  client.on('disconnect', () => {
+    store.dispatch(disconnectUser(client.id));
+  });
+});
 
 app.use(morgan('dev'));
 app.use(cors({ origin: true, credentials: true }));

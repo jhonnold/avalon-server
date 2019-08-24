@@ -1,6 +1,7 @@
 const REGISTER_USER = '@avalon/users/REGISTER_USER';
+const DISCONNECT_USER = '@avalon/users/DISCONNECT_USER';
 
-const initialState = [];
+const initialState = {};
 const reducer = (state = initialState, action) => {
   const { type, payload } = action;
 
@@ -11,6 +12,11 @@ const reducer = (state = initialState, action) => {
         [payload.id]: payload,
       };
     }
+    case DISCONNECT_USER: {
+      const newState = {...state};
+      delete newState[payload.id];
+      return newState;
+    }
     default: {
       return state;
     }
@@ -20,6 +26,11 @@ const reducer = (state = initialState, action) => {
 reducer.registerUser = (name, id) => ({
   type: REGISTER_USER,
   payload: { name, id },
+});
+
+reducer.disconnectUser = (id) => ({
+  type: DISCONNECT_USER,
+  payload: { id },
 });
 
 module.exports = reducer;
