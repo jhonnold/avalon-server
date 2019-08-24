@@ -8,8 +8,10 @@ module.exports = (req, res) => {
 
   const id = shortid.generate();
 
-  store.dispatch(createRoom(id, name));
-  res.io.emit('room created', { name, id });
-  
-  res.sendStatus(201);
+  store.dispatch(createRoom(id, name, req.user.id));
+
+  const room = store.getState().rooms[id];
+
+  res.io.emit('room created', room);
+  res.status(201).send(room);
 };

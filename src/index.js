@@ -32,6 +32,12 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 
 app.use(basicAuth({ authorizer }));
+app.use((req, _, next) => {
+  const { password } = req.auth;
+
+  req.user = store.getState().users[password];
+  next();
+});
 app.use((_, res, next) => {
   res.io = io;
   next();
