@@ -11,5 +11,6 @@ module.exports = (req, res) => {
   if (room.hostId !== userId) return res.sendStatus(403);
 
   store.dispatch(deleteRoom(roomId));
+  res.io.emit('room deleted', { roomId });
   res.sendStatus(204);
 };
