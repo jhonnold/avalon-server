@@ -1,18 +1,38 @@
 const http = require('http');
 const express = require('express');
+const socketIO = require('socket.io');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const store = require('./store');
+const { registerUser } = require('./ducks/users');
 
 const app = express();
-app.server = http.createServer(app);
+const server = http.createServer(app);
+const io = socketIO.listen(server);
 
-if (process.env.NODE_ENV !== 'test') app.use(morgan('dev'));
-app.use(bodyParser.json());
+io.on('connect', client => {
+  const { name } = client.handshake.query;
 
-app.use('/', (_, res) => {
-  res.send({ foo: 'bar' });
+  if (name) {
+    store.dispatch(registerUser(name, client.id));
+    client.emit('handshake completed', client.id);
+  }
 });
 
-app.server.listen(8080, () => {
-  console.log('Started listening on port: 8080');
+
+app.use(morgan('dev'));
+app.use(cors({ origin: true, credentials: true }));
+app.use(bodyParser.json());
+
+app.use((_, res, next) => {
+  res.io = io;
+  next();
+});
+
+app.use('/rooms', require('./rooms'));
+
+server.listen(8080, () => {
+  console.log('Started listening on port 8080!');
 });

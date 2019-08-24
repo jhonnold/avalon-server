@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    image: avalon-server
+    command: yarn start:dev
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
