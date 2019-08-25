@@ -7,6 +7,9 @@
     var socket = io('http://localhost:8080', { query: 'name=test' });
 
     socket.on('room created', console.log);
+    socket.on('room updated', console.log);
+    socket.on('room deleted', console.log);
+    socket.on('game started', console.log);
     socket.on('handshake completed', console.log);
   </script>  
 </body>
