@@ -1,3 +1,5 @@
+const { DISCONNECT_USER } = require('./users');
+
 const CREATE_ROOM = '@avalon/rooms/CREATE_ROOM';
 const DELETE_ROOM = '@avalon/rooms/DELETE_ROOM';
 const JOIN_ROOM = '@avalon/rooms/JOIN_ROOM';
@@ -38,6 +40,16 @@ const reducer = (state = initialState, action) => {
           users: currentUsers.filter(id => id !== payload.userId),
         },
       }; 
+    }
+    case DISCONNECT_USER: {
+      const newState = { ...state };
+      Object.keys(newState).forEach(k => {
+        newState[k] = {
+          ...newState[k],
+          users: newState[k].users.filter(id => id !== payload.id),
+        }
+      });
+      return newState;
     }
     default: {
       return state;

@@ -33,4 +33,9 @@ reducer.disconnectUser = (id) => ({
   payload: { id },
 });
 
+reducer.types = {
+  REGISTER_USER,
+  DISCONNECT_USER,
+};
+
 module.exports = reducer;
