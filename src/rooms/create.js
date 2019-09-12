@@ -12,5 +12,5 @@ module.exports = (req, res) => {
 
   const room = store.getState().rooms[roomId];
   res.io.emit('room created', room);
-  res.sendStatus(201);
+  res.status(201).send(room);
 };
