@@ -9,8 +9,8 @@ module.exports = (req, res) => {
   const roomId = shortid.generate();
 
   store.dispatch(createRoom(roomId, name, req.user.id));
-
   const room = store.getState().rooms[roomId];
+  
   res.io.emit('room created', room);
-  res.sendStatus(201);
+  res.status(200).send(room);
 };
