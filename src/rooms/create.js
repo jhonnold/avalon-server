@@ -17,8 +17,6 @@ module.exports = (req, res) => {
 
   const room = getRoom(roomId);
   
-  console.log(room);
-
   res.io.emit('room created', room);
   res.status(200).send(room);
 };
