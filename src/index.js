@@ -9,6 +9,8 @@ const cors = require('cors');
 const authorizer = require('./auth');
 const store = require('./store');
 const { registerUser, disconnectUser } = require('./ducks/users');
+const { teardownUser } = require('./ducks/roomConnections');
+const getRoom = require('./util/getRoom');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,7 +25,15 @@ io.on('connect', client => {
   }
 
   client.on('disconnect', () => {
+    const { roomConnections } = store.getState();
+    const changingRooms = new Set(roomConnections
+        .filter(c => c.userId === client.id)
+        .map(c => c.roomId));
+
     store.dispatch(disconnectUser(client.id));
+    store.dispatch(teardownUser(client.id));
+
+    changingRooms.forEach(r => io.emit('room updated', getRoom(r)));
   });
 });
 

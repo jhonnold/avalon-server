@@ -1,4 +1,4 @@
-const createRoles = require('../util/role-generator');
+const createRoles = require('../util/roleGenerator');
 
 const CREATE_GAME = '@avalon/games/CREATE_GAME';
 
