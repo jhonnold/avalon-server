@@ -1,4 +1,4 @@
-const createRoles = require('../util/role-generator');
+const createRoles = require('../util/roleGenerator');
 
 const CREATE_GAME = '@avalon/games/CREATE_GAME';
 
@@ -19,11 +19,11 @@ const reducer = (state = initialState, action) => {
   }
 };
 
-reducer.createGame = room => ({
+reducer.createGame = (room, users) => ({
   type: CREATE_GAME,
   payload: {
     gameId: room.roomId,
-    roles: createRoles(room.users),
+    roles: createRoles(users),
   },
 });
 

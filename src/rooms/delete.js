@@ -1,5 +1,6 @@
 const store = require('../store');
 const { deleteRoom } = require('../ducks/rooms');
+const { teardownRoom } = require('../ducks/roomConnections');
 
 module.exports = (req, res) => {
   const { roomId } = req.params;
@@ -11,6 +12,8 @@ module.exports = (req, res) => {
   if (room.hostId !== userId) return res.sendStatus(403);
 
   store.dispatch(deleteRoom(roomId));
+  store.dispatch(teardownRoom(roomId));
+  
   res.io.emit('room deleted', { roomId });
   res.sendStatus(204);
 };

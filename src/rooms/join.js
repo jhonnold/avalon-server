@@ -1,5 +1,6 @@
 const store = require('../store');
-const { joinRoom } = require('../ducks/rooms');
+const { connectUser } = require('../ducks/roomConnections');
+const getRoom = require('../util/getRoom');
 
 module.exports = (req, res) => {
   const { roomId } = req.params;
@@ -7,9 +8,8 @@ module.exports = (req, res) => {
   if (!(roomId in rooms)) return res.sendStatus(404);
 
   const { id: userId } = req.user;
-  store.dispatch(joinRoom(roomId, userId));
+  store.dispatch(connectUser(roomId, userId));
 
-  const room = store.getState().rooms[roomId];
-  res.io.emit('room updated', room);
+  res.io.emit('room updated', getRoom(roomId));
   res.sendStatus(204);
 };

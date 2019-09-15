@@ -1,5 +1,6 @@
 const store = require('../store');
-const { leaveRoom } = require('../ducks/rooms');
+const getRoom = require('../util/getRoom');
+const { disconnectUser } = require('../ducks/roomConnections');
 
 module.exports = (req, res) => {
   const { roomId } = req.params;
@@ -7,11 +8,11 @@ module.exports = (req, res) => {
   if (!(roomId in rooms)) return res.sendStatus(404);
 
   const { id: userId } = req.user;
-  if (userId === store.getState().rooms[roomId].hostId) return res.sendStatus(405);
+  const { room } = rooms[roomId];
+  if (userId === room.hostId) return res.sendStatus(405);
   
-  store.dispatch(leaveRoom(roomId, userId));
+  store.dispatch(disconnectUser(roomId, userId));
 
-  const room = store.getState().rooms[roomId];
-  res.io.emit('room updated', room);
+  res.io.emit('room updated', getRoom(roomId));
   res.sendStatus(204);
 };

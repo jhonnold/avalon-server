@@ -1,5 +1,8 @@
 const store = require('../store');
+const getRoom = require('../util/getRoom');
 
 module.exports = (_, res) => {
-  res.send(Object.values(store.getState().rooms));
+  const { rooms } = store.getState();
+
+  res.send(Object.keys(rooms).map(getRoom));
 };

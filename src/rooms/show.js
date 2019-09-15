@@ -1,4 +1,5 @@
 const store = require('../store');
+const getRoom = require('../util/getRoom');
 
 module.exports = (req, res) => {
   const { roomId } = req.params;
@@ -6,5 +7,5 @@ module.exports = (req, res) => {
 
   if (!(roomId in rooms)) return res.sendStatus(404);
 
-  res.send(rooms[roomId]);
+  res.send(getRoom(roomId));
 };
