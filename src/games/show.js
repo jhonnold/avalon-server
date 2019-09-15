@@ -13,7 +13,7 @@ module.exports = (req, res) => {
   if (!role) return res.status(400).send('You are not in this game!');
 
   const mordredId = _.findKey(game.roles, o => o === 'Mordred');
-  const mordred = users[mordredId].name;
+  const mordred = _.get(users, `${mordredId}.name`, 'nobody');
 
   const morganaId = _.findKey(game.roles, o => o === 'Morgana');
   const morgana = users[morganaId].name;
