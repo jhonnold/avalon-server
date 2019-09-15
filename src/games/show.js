@@ -13,22 +13,22 @@ module.exports = (req, res) => {
   if (!role) return res.status(400).send('You are not in this game!');
 
   const mordredId = _.findKey(game.roles, o => o === 'Mordred');
-  const mordred = _.get(users, `${mordredId}.name`, 'nobody');
+  const mordred = _.get(users, [mordredId, 'name'], 'Nobody');
 
   const morganaId = _.findKey(game.roles, o => o === 'Morgana');
-  const morgana = users[morganaId].name;
+  const morgana = _.get(users, [morganaId, 'name'], 'Nobody');
   
   const assassinId = _.findKey(game.roles, o => o === 'Assassin');
-  const assassin = users[assassinId].name;
+  const assassin = _.get(users, [assassinId, 'name'], 'Nobody');
   
   const merlinId = _.findKey(game.roles, o => o === 'Merlin');
-  const merlin = users[merlinId].name;
+  const merlin = _.get(users, [merlinId, 'name'], 'Nobody');
 
   switch (role) {
     case 'Vanilla Good': {
       return res.send({
         role,
-        team: 'good',
+        team: 'Good',
         message: 'You are Vanilla Good. Try find the good!',
       });
     }
@@ -36,7 +36,7 @@ module.exports = (req, res) => {
     case 'Assassin': {
       return res.send({
         role,
-        team: 'evil',
+        team: 'Evil',
         message: `You are the Assassin, keep your eye out for Merlin! ${mordred} is Mordred, ${morgana} is your other ally.`
       });
     }
@@ -44,7 +44,7 @@ module.exports = (req, res) => {
     case 'Morgana': {
       return res.send({
         role,
-        team: 'evil',
+        team: 'Evil',
         message: `You are Morgana, you look like Merlin! ${mordred} is Mordred, ${assassin} is your other ally.`,
       });
     }
@@ -52,7 +52,7 @@ module.exports = (req, res) => {
     case 'Mordred': {
       return res.send({
         role,
-        team: 'evil',
+        team: 'Evil',
         message: `You are Mordred, the ultimate evil!!! ${assassin} and ${morgana} are your allies.`,
       });
     }
@@ -62,7 +62,7 @@ module.exports = (req, res) => {
 
       return res.send({
         role,
-        team: 'good',
+        team: 'Good',
         message: `You are Percival, figure out who is who between ${mixed[0]} and ${mixed[1]}`,
       });
     }
@@ -72,7 +72,7 @@ module.exports = (req, res) => {
 
       return res.send({
         role,
-        team: 'good',
+        team: 'Good',
         message: `You are Merlin, the ultimate good!! Stay hidden from the assassin and lead your team through the unknown! Keep your eyes on ${mixed[0]} and ${mixed[1]}.`,
       });
     }
