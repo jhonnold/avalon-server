@@ -7,7 +7,8 @@
   "author": "Jay Honnold <jayhonnold@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:dev": "nodemon -w src --exec \"node src\""
+    "start:dev": "nodemon -w src --exec \"node src\"",
+    "start": "node src"
   },
   "devDependencies": {
     "eslint": "^6.2.1",

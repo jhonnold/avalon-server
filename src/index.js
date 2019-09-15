@@ -63,6 +63,7 @@ app.use((_, res, next) => {
 });
 
 app.use('/rooms', require('./rooms'));
+app.use('/games', require('./games'));
 
 server.listen(8080, () => {
   console.log('Started listening on port 8080!');
