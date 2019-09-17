@@ -8,14 +8,16 @@ const auth = (req, res, next) => {
   const token = auth.replace('Bearer ', '');
   const data = jwt.verify(token, 'Secret');
 
-  User.findById(data._id).select('-password').exec()
+  User.findById(data._id).select('-password')
+    .populate(['roomConnection', 'isConnected', 'gameConnection']).exec()
     .then(user => {
       if (!user) throw new Error();
 
       req.user = user;
       next();
     })
-    .catch(() => {
+    .catch((error) => {
+      console.error(error);
       res.status(401).send({ error: 'Not authorized' });
     });
 };

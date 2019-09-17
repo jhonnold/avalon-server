@@ -17,6 +17,8 @@ app.use(bodyParser.json());
 app.use(addIo(io));
 
 app.use('/users', require('./routes/users'));
+app.use('/rooms', auth, require('./routes/rooms'));
+app.use('/games', auth, require('./routes/games'));
 
 server.listen(8080, () => {
   db.connect();

@@ -5,22 +5,22 @@ const jwt = require('jsonwebtoken');
 
 const userSchema = new Schema({
   _id: { type: String, default: shortid.generate },
-  username: { type: String, index: { unique: true }},
-  password: { type: String },
-  displayName: String,
-  isConnected: Boolean,
+  username: { type: String, index: { unique: true }, required: true },
+  password: { type: String, required: true },
+  displayName: { type: String, required: true },
+  isConnected: { type: Boolean, default: false },
   roomConnection: {
-    type: Schema.Types.ObjectId,
-    ref: 'Room',
+    type: String,
+    default: null,
   },
   gameConnection: {
-    type: Schema.Types.ObjectId,
-    ref: 'Game',
+    type: String,
+    default: null,
   },
 });
 
 userSchema.pre('save', function(next) {
-  if (!this.isModified('password')) return;
+  if (!this.isModified('password')) return next();
 
   bcrypt.hash(this.password, 8)
     .then(password => {
