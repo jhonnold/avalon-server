@@ -8,7 +8,7 @@ module.exports = (req, res) => {
   if (!(roomId in rooms)) return res.sendStatus(404);
 
   const { id: userId } = req.user;
-  const { room } = rooms[roomId];
+  const room = rooms[roomId];
   if (userId === room.hostId) return res.sendStatus(405);
   
   store.dispatch(disconnectUser(roomId, userId));
