@@ -47,8 +47,7 @@ router.put('/join-room', auth, (req, res) => {
     .then(room => {
       if (!room) throw new Error({ error: 'Room not found!' });
 
-      req.user.roomConnection = room._id;
-      return req.user.save();
+      return req.user.setRoomConnection(room);
     })
     .then(user => {
       res.status(200).send(user)

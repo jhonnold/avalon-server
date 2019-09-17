@@ -8,8 +8,7 @@ const auth = (req, res, next) => {
   const token = auth.replace('Bearer ', '');
   const data = jwt.verify(token, 'Secret');
 
-  User.findById(data._id).select('-password')
-    .populate(['roomConnection', 'isConnected', 'gameConnection']).exec()
+  User.findById(data._id).select('-password').exec()
     .then(user => {
       if (!user) throw new Error();
 

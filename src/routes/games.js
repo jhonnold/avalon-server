@@ -1,10 +1,14 @@
 const express = require('express');
 const Game = require('../models/game');
+const { requiredInfo } = require('../util/roles');
 
 const router = express.Router();
 
 router.get('/', (_, res) => {
-  Game.find().exec()
+  Game.find()
+    .populate('users', '_id isConnected username displayName')
+    .select('-roles')
+    .exec()
     .then(games => {
       res.status(200).send(games);
     });
@@ -13,7 +17,10 @@ router.get('/', (_, res) => {
 router.get('/:gameId', (req, res) => {
   const { gameId } = req.params;
 
-  Game.findById(gameId).exec()
+  Game.findById(gameId)
+    .populate('users', '_id isConnected username displayName')
+    .select('-roles')
+    .exec()
     .then(game => {
       if (!game) throw new Error({ error: 'Not Found!' });
 
@@ -24,12 +31,35 @@ router.get('/:gameId', (req, res) => {
     });
 });
 
+router.get('/:gameId/me', (req, res) => {
+  const { gameId } = req.params;
+
+  Game.findById(gameId)
+    .populate('users')
+    .exec()
+    .then(game => {
+      if (!game) throw new Error({ error: 'Not Found' });
+
+      const info = requiredInfo(req.user._id, game.roles, game.users);
+      res.status(200).send(info);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+});
+
 router.post('/', (req, res) => {
   const { roomId } = req.body;
   if (!roomId) return res.status(400).send('roomId is required!');
 
   Game.fromRoomId(roomId)
-    .then(game => {
+    .then(game => Promise.all([
+      game.toObject(),
+      ...game.users.map(u => u.setGameConnection(game)),
+    ]))
+    .then(([game]) => {
+      delete game['roles']; // Don't want to reveal to the FE
+
       res.status(201).send(game);
     });
 });

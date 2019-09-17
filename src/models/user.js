@@ -34,8 +34,20 @@ userSchema.methods.generateToken = function() {
   return token;
 };
 
+userSchema.methods.setGameConnection = function (game) {
+  this.roomConnection = null;
+  this.gameConnection = game._id;
+  return this.save();
+}
+
+userSchema.methods.setRoomConnection = function (room) {
+  this.roomConnection = room._id;
+  this.gameConnection = null;
+  return this.save();
+}
+
 userSchema.statics.login = function (username, password) {
-  return User.findOne({ username }).select('+password').exec()
+  return User.findOne({ username }).exec()
     .then(user => {
       if (!user) throw new Error({ error: 'Unknown user!' });
 
