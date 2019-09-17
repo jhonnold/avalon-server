@@ -7,7 +7,7 @@
   "author": "Jay Honnold <jayhonnold@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start:dev": "nodemon -w src --exec \"node src\"",
+    "start:watch": "nodemon -w src --exec \"node src\"",
     "start": "node src"
   },
   "devDependencies": {
@@ -16,11 +16,13 @@
     "redux-logger": "^3.0.6"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-basic-auth": "^1.2.0",
+    "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
+    "mongoose": "^5.7.1",
     "morgan": "^1.9.1",
     "redux": "^4.0.4",
     "shortid": "^2.2.14",
