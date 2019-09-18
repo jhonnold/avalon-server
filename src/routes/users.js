@@ -50,10 +50,10 @@ router.put('/join-room', auth, (req, res) => {
       return req.user.setRoomConnection(room);
     })
     .then(user => {
-      res.status(200).send(user)
+      res.status(200).send(user);
     })
     .catch(error => {
-      res.status(400).send(error)
+      res.status(400).send(error);
     });
 });
 
@@ -68,7 +68,7 @@ router.put('/leave-room', auth, (req, res) => {
     })
     .catch(error => {
       res.status(500).send(error);
-    })
+    });
 });
 
 module.exports = router;

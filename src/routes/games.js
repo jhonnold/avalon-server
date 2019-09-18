@@ -1,6 +1,7 @@
 const express = require('express');
 const Game = require('../models/game');
 const { requiredInfo } = require('../util/roles');
+const emitter = require('../events/emitter');
 
 const router = express.Router();
 
@@ -60,8 +61,12 @@ router.post('/', (req, res) => {
     .then(([game]) => {
       delete game['roles']; // Don't want to reveal to the FE
 
+      emitter.emit('game started', game._id);
       res.status(201).send(game);
-    });
+    })
+    .catch(error => {
+      res.status(400).send(error);
+    })
 });
 
 module.exports = router;

@@ -2,6 +2,7 @@ const { model, Schema } = require('mongoose');
 const shortid = require('shortid');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
+const emitter = require('../events/emitter');
 
 const userSchema = new Schema({
   _id: { type: String, default: shortid.generate },
@@ -9,17 +10,15 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   displayName: { type: String, required: true },
   isConnected: { type: Boolean, default: false },
-  roomConnection: {
-    type: String,
-    default: null,
-  },
-  gameConnection: {
-    type: String,
-    default: null,
-  },
+  roomConnection: { type: String, default: null },
+  gameConnection: { type: String, default: null },
 });
 
-userSchema.pre('save', function(next) {
+userSchema.post('init', function () {
+  this._db = this.toObject();
+});
+
+userSchema.pre('save', function (next) {
   if (!this.isModified('password')) return next();
 
   bcrypt.hash(this.password, 8)
@@ -29,19 +28,30 @@ userSchema.pre('save', function(next) {
     });
 });
 
-userSchema.methods.generateToken = function() {
+userSchema.post('save', function (doc) {
+  if (doc._db.isConnected != doc.isConnected) {
+    emitter.emit('room updated', doc.roomConnection);
+  }
+
+  if (doc._db.roomConnection != doc.roomConnection) {
+    emitter.emit('room updated', doc._db.roomConnection);
+    emitter.emit('room updated', doc.roomConnection);
+  }
+});
+
+userSchema.methods.generateToken = function () {
   const token = jwt.sign({ _id: this._id }, 'Secret');
   return token;
 };
 
 userSchema.methods.setGameConnection = function (game) {
   this.roomConnection = null;
-  this.gameConnection = game._id;
+  this.gameConnection = game;
   return this.save();
 }
 
 userSchema.methods.setRoomConnection = function (room) {
-  this.roomConnection = room._id;
+  this.roomConnection = room;
   this.gameConnection = null;
   return this.save();
 }
@@ -54,7 +64,7 @@ userSchema.statics.login = function (username, password) {
       return Promise.all([bcrypt.compare(password, user.password), user]);
     })
     .then(([isCorrect, user]) => {
-      if (!isCorrect) throw new Error({ error: 'Incorrect email!' });
+      if (!isCorrect) throw new Error({ error: 'Incorrect password!' });
 
       return user;
     });
