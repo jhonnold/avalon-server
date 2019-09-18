@@ -2,29 +2,31 @@
 
 ### Connection Protocol
 
-#### Websocket
-In order to communicate with this server, there must be an active websocket connection. 
-The handshake URL should include a `name` query parameter (*the user's desired visual name*).
-Upon handshake completion the application fires a `handshake complete` message which returns the clients ID.
 #### HTTP
-All HTTP requests made to the server must include basic auth. The `username` is the `name` query parameter
-sent on the initial websocket handshake. The `password` is the `clientId` that was replied by via `handshake complete`.
-
-**NON-GET** HTTP requests will tend not to return values just the relevant HTTP codes. Data will come via websocket
-in order to have all clients recieve the necessary information.
+Authentication is done via standard JWT Bearer tokens. All routes, except those for login and registration require this token.
+#### Websocket
+The application consistently pushes events via a WS connection to the client for live data display.
+When connecting to the WS, a `token` parameter must be passed as well (no bearer required). All connections will be rejected without this.
 
 ---
 
 ### Endpoints
 
-|Endpoint|Body (if necessary)|Websocket event|
+|Endpoint|Body|Event|
 |:-----|:---------------:|:----------:|
+|`POST /users/login`| `{ username, password }` | *N/A* |
+|`POST /users`| `{ username, password, displayName }` | *N/A* |
+|`GET /users/me`| *N/A* | *N/A* |
+|`PUT /users/join-room`| `{ roomId }` | `room updated` |
+|`PUT /users/leave-room`| *N/A* | `room updated` |
 |`GET /rooms`| *N/A* | *N/A* |
-|`POST /rooms`| `{ name }` | `room created` |
-|`PUT /rooms/:roomId/join`| *N/A* | `room updated` |
-|`PUT /rooms/:roomId/leave`| *N/A* | `room updated` |
-|`DELETE /rooms/:roomId`| *N/A* | `room deleted` |
-
+|`GET /rooms/:id`| *N/A* | *N/A* |
+|`POST /rooms`| `{ name }` | `room updated` |
+|`DELETE /rooms/:id`| *N/A* | `room deleted` |
+|`GET /games` | *N/A* | *N/A* |
+|`GET /games/:id` | *N/A* | *N/A* |
+|`GET /games/:id/me` | *N/A* | *N/A* |
+|`POST /games` | `{ roomId }` | `game started` |
 ---
 
 
