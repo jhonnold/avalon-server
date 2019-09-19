@@ -4,7 +4,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
   <script>
-    var socket = io('http://localhost:8080', { query: 'name=test' });
+    var socket = io('http://localhost:8080', { query: 'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJVZUtLM0lSTlgiLCJpYXQiOjE1Njg4MDY4NzJ9.zJvs8EYaiojRVq0Xo4GrYpsz3I_FYLRvhwr9mmKoOUI' });
 
     socket.on('room created', console.log);
     socket.on('room updated', console.log);

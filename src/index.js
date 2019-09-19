@@ -24,5 +24,6 @@ app.use('/games', auth, require('./routes/games'));
 
 server.listen(8080, () => {
   db.connect();
+  
   console.log('Started listening on port 8080!');
 });
