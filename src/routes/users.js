@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const express = require('express');
 const auth = require('../middleware/auth');
 const User = require('../models/user');
@@ -12,7 +13,7 @@ router.get('/me', auth, (req, res) => {
 router.post('/', (req, res) => {
   const { username, password, displayName } = req.body;
   if (!username || !password || !displayName) {
-    return res.status(400).send('username, pass, and displayName are required!');
+    return res.status(400).send({ error: 'username, password, and displayName are required!'});
   }
 
   const user = new User({ username, password, displayName });
@@ -21,7 +22,10 @@ router.post('/', (req, res) => {
       res.status(201).send({ user, token: user.generateToken() });
     })
     .catch(error => {
-      res.status(400).send(error);
+      log.error(error);
+
+      if (error.code === 11000) res.status(400).send({ error: 'username is taken!' });
+      else res.status(500).send(error);
     })
 });
 
@@ -35,7 +39,11 @@ router.post('/login', (req, res) => {
       res.status(200).send({ user, token: user.generateToken() });
     })
     .catch(error => {
-      res.status(400).send(error);
+      log.error(error);
+
+      if (error.message === 'Incorrect Password!') res.status(401).send({ error: 'Login Failed!' });
+      else if (error.message === 'Unknown user!') res.status(400).send({ error: 'Unknown user! '});
+      else res.sendStatus(500);
     })
 });
 
@@ -53,7 +61,9 @@ router.put('/join-room', auth, (req, res) => {
       res.status(200).send(user);
     })
     .catch(error => {
-      res.status(400).send(error);
+      log.error(error);
+
+      res.sendStatus(500);
     });
 });
 
@@ -67,7 +77,9 @@ router.put('/leave-room', auth, (req, res) => {
       res.status(200).send(user);
     })
     .catch(error => {
-      res.status(500).send(error);
+      log.error(error);
+
+      res.sendStatus(500);
     });
 });
 

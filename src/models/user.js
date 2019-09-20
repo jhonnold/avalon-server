@@ -29,6 +29,8 @@ userSchema.pre('save', function (next) {
 });
 
 userSchema.post('save', function (doc) {
+  if (!doc._db) return;
+
   if (doc._db.isConnected != doc.isConnected) {
     emitter.emit('room updated', doc.roomConnection);
   }
@@ -59,12 +61,12 @@ userSchema.methods.setRoomConnection = function (room) {
 userSchema.statics.login = function (username, password) {
   return User.findOne({ username }).exec()
     .then(user => {
-      if (!user) throw new Error({ error: 'Unknown user!' });
+      if (!user) throw new Error('Unknown user!');
 
       return Promise.all([bcrypt.compare(password, user.password), user]);
     })
     .then(([isCorrect, user]) => {
-      if (!isCorrect) throw new Error({ error: 'Incorrect password!' });
+      if (!isCorrect) throw new Error('Incorrect Password!');
 
       return user;
     });

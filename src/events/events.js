@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const emitter = require('./emitter');
 const io = require('./io');
 const Room = require('../models/room');
@@ -6,15 +7,20 @@ const User = require('../models/user');
 
 module.exports = () => {
   emitter.on('user connected', (id, client) => {
+
     User.findById(id).exec()
       .then(user => {
         if (!user) throw new Error();
+
+        log('User Connected --', user._id, '--', user.displayName);
 
         user.isConnected = true;
         return user.save();
       })
       .then(user => {
         client.on('disconnect', () => {
+          log('User Disconnected --', user._id, '--', user.displayName);
+
           user.isConnected = false;
           return user.save();
         })
@@ -23,17 +29,23 @@ module.exports = () => {
   });
 
   emitter.on('room updated', (roomId) => {
-    Room.findById(roomId).exec()
+    if (roomId === null) return;
+
+    Room.findById(roomId).populate('host').exec()
       .then(room => {
-        if (!room) throw new Error();
+        if (!room) throw new Error('Room not found!');
 
         return room.serialize();
       })
-      .then(room => io.emit('room updated', room))
-      .catch(console.error);
+      .then(room => {
+        log('Room Updated --', room._id, '--', room.name);
+        io.emit('room updated', room);
+      })
+      .catch(log.error);
   });
 
   emitter.on('room deleted', (roomId) => {
+    log('Room Deleted --', roomId);
     io.emit('room deleted', { _id: roomId });
   });
 
@@ -45,8 +57,9 @@ module.exports = () => {
       .then(game => {
         if (!game) throw new Error();
 
+        log('Game Started --', game._id, '--', game.name)
         io.emit('game started', game);
       })
-      .catch(console.error);
+      .catch(log.error);
   })
 };

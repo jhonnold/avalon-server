@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const express = require('express');
 const Game = require('../models/game');
 const { requiredInfo } = require('../util/roles');
@@ -12,7 +13,11 @@ router.get('/', (_, res) => {
     .exec()
     .then(games => {
       res.status(200).send(games);
-    });
+    })
+    .catch(error => {
+      log.error(error);
+      res.sendStatus(500);
+    })
 })
 
 router.get('/:gameId', (req, res) => {
@@ -28,7 +33,8 @@ router.get('/:gameId', (req, res) => {
       res.status(200).send(game);
     })
     .catch(error => {
-      res.status(500).send(error);
+      log.error(error);
+      res.sendStatus(500);
     });
 });
 
@@ -45,7 +51,8 @@ router.get('/:gameId/me', (req, res) => {
       res.status(200).send(info);
     })
     .catch(error => {
-      res.status(500).send(error);
+      log.error(error);
+      res.sendStatus(500);
     })
 });
 
@@ -65,8 +72,9 @@ router.post('/', (req, res) => {
       res.status(201).send(game);
     })
     .catch(error => {
-      res.status(400).send(error);
-    })
+      log.error(error);
+      res.sendStatus(500);
+    });
 });
 
 module.exports = router;

@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -10,13 +11,13 @@ const auth = (req, res, next) => {
 
   User.findById(data._id).select('-password').exec()
     .then(user => {
-      if (!user) throw new Error();
+      if (!user) throw new Error({ error: 'Bad id!' });
 
       req.user = user;
       next();
     })
     .catch((error) => {
-      console.error(error);
+      log.error(error);
       res.status(401).send({ error: 'Not authorized' });
     });
 };

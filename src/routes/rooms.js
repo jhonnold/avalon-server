@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const express = require('express');
 const Room = require('../models/room');
 
@@ -8,18 +9,25 @@ router.get('/', (_, res) => {
     .then(rooms => Promise.all(rooms.map(r => r.serialize())))
     .then(serializedRooms => {
       res.status(200).send(serializedRooms);
+    })
+    .catch(error => {
+      log.error(error);
+      res.sendStatus(500);
     });
 });
 
 router.get('/:roomId', (req, res) => {
   const { roomId } = req.params;
   
-  Room.findById(roomId).exec()
+  Room.findById(roomId).populate('host').exec()
     .then(room => room.serialize())
     .then(serializedRoom => {
       res.status(200).send(serializedRoom);
     })
-    .catch(error => res.status(500).send(error));
+    .catch(error => {
+      log.error(error);
+      res.sendStatus(500);
+    });
 });
 
 router.post('/', (req, res) => {
@@ -32,7 +40,10 @@ router.post('/', (req, res) => {
     .then(room => {
       res.status(201).send(room);
     })
-    .catch(console.error);
+    .catch(error => {
+      log.error(error);
+      res.sendStatus(500);
+    });
 });
 
 router.delete('/:roomId', (req, res) => {
@@ -41,7 +52,10 @@ router.delete('/:roomId', (req, res) => {
   Room.findById(roomId).exec()
     .then(room => room.remove())
     .then(room => res.status(200).send(room))
-    .catch(error => res.status(500).send(error));
+    .catch(error => {
+      log.error(error);
+      res.sendStatus(500);
+    });
 });
 
 module.exports = router;

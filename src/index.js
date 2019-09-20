@@ -1,3 +1,4 @@
+const log = require('fancy-log');
 const http = require('http');
 const express = require('express');
 const morgan = require('morgan');
@@ -14,7 +15,7 @@ const server = http.createServer(app);
 io.attach(server);
 loadEvents();
 
-app.use(morgan('dev'));
+app.use(morgan('dev', { stream: { write: log, } }));
 app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 
@@ -25,5 +26,5 @@ app.use('/games', auth, require('./routes/games'));
 server.listen(8080, () => {
   db.connect();
   
-  console.log('Started listening on port 8080!');
+  log('Started listening on port 8080!');
 });
