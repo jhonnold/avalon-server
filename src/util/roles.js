@@ -16,20 +16,22 @@ module.exports = {
     const roles = _.shuffle(rolesMap[players.length]);
     return _.zipObject(players, roles);
   },
-  requiredInfo: (id, roleMap, users) => {
+  requiredInfo: (id, map, users) => {
+    const roleMap = {};
+    for (const k of map.keys()) roleMap[k] = map.get(k);
     const role = roleMap[id];
 
     const mordredId = _.findKey(roleMap, o => o === 'Mordred');
-    const mordred = _.get(users, [mordredId, 'displayName'], 'Nobody');
+    const mordred = _.get(_.find(users, ['_id', mordredId]), 'displayName', 'Nobody');
 
     const morganaId = _.findKey(roleMap, o => o === 'Morgana');
-    const morgana = _.get(users, [morganaId, 'displayName'], 'Nobody');
+    const morgana = _.get(_.find(users, ['_id', morganaId]), 'displayName', 'Nobody');
 
     const assassinId = _.findKey(roleMap, o => o === 'Assassin');
-    const assassin = _.get(users, [assassinId, 'displayName'], 'Nobody');
+    const assassin = _.get(_.find(users, ['_id', assassinId]), 'displayName', 'Nobody');
 
     const merlinId = _.findKey(roleMap, o => o === 'Merlin');
-    const merlin = _.get(users, [merlinId, 'displayName'], 'Nobody');
+    const merlin = _.get(_.find(users, ['_id', merlinId]), 'displayName', 'Nobody');
 
     switch (role) {
       case 'Vanilla Good': {

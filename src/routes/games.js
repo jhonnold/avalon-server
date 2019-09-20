@@ -45,7 +45,7 @@ router.get('/:gameId/me', (req, res) => {
     .populate('users')
     .exec()
     .then(game => {
-      if (!game) throw new Error({ error: 'Not Found' });
+      if (!game) throw new Error('Not Found!');
 
       const info = requiredInfo(req.user._id, game.roles, game.users);
       res.status(200).send(info);
