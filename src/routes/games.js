@@ -87,6 +87,25 @@ router.post('/', (req, res) => {
     });
 });
 
+router.put('/:gameId/restart', (req, res) => {
+  const { gameId } = req.body;
+  
+  Game.findById(gameId).populate('users').exec()
+    .then(game => {
+      if (!game) throw new Error('Game not found!');
+
+      return game.restart();
+    })
+    .then(game => {
+      emitter.emit('game restarted', game._id);
+    })
+    .catch(error => {
+      log.error(error);
+
+      res.sendStatus(500);
+    });
+});
+
 router.delete('/:gameId', (req, res) => {
   const { gameId } = req.params;
 

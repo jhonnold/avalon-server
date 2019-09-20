@@ -30,6 +30,12 @@ gameSchema.statics.fromRoomId = function (roomId) {
     });
 }
 
+gameSchema.methods.restart = function () {
+  this.roles = roleGenerator(this.users.map(u => u._id));
+  
+  return this.save();
+};
+
 const Game = model('Game', gameSchema);
 
 module.exports = Game;

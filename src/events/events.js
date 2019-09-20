@@ -67,4 +67,9 @@ module.exports = () => {
     log('Game Ended --', gameId);
     io.emit('game ended', { _id: gameId });
   });
+
+  emitter.on('game restarted', (gameId) => {
+    log('Game Restarted --', gameId);
+    io.emit('game restarted', { _id: gameId });
+  });
 };
