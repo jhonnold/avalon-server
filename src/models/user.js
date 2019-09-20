@@ -29,7 +29,7 @@ userSchema.pre('save', function (next) {
 });
 
 userSchema.post('save', function (doc) {
-  if (!doc._db) return;
+  if (!doc._db) doc._db = doc.toObject();
 
   if (doc._db.isConnected != doc.isConnected) {
     emitter.emit('room updated', doc.roomConnection);

@@ -53,7 +53,7 @@ router.put('/join-room', auth, (req, res) => {
 
   Room.findById(roomId).exec()
     .then(room => {
-      if (!room) throw new Error({ error: 'Room not found!' });
+      if (!room) throw new Error('Room not found!');
 
       return req.user.setRoomConnection(room);
     })
@@ -75,6 +75,19 @@ router.put('/leave-room', auth, (req, res) => {
   req.user.save()
     .then(user => {
       res.status(200).send(user);
+      return User.find({ roomConnection }).exec()
+    })
+    .then(users => {
+      if (users.length > 0) {
+        Room.findById(roomConnection).exec()
+          .then(room => {
+            room.host = users[0];
+            room.save();
+          })
+      } else {
+        Room.findById(roomConnection).exec()
+          .then(room => room.remove());
+      }
     })
     .catch(error => {
       log.error(error);
