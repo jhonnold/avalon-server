@@ -7,8 +7,13 @@ const emitter = require('../events/emitter');
 const router = express.Router();
 
 router.get('/', (_, res) => {
+  const populate = [
+    { path: 'users', select: '_id isConnected username displayName' },
+    { path: 'host', select: '_id' },
+  ];
+
   Game.find()
-    .populate('users', '_id isConnected username displayName')
+    .populate(populate)
     .select('-roles')
     .exec()
     .then(games => {
@@ -23,8 +28,13 @@ router.get('/', (_, res) => {
 router.get('/:gameId', (req, res) => {
   const { gameId } = req.params;
 
+  const populate = [
+    { path: 'users', select: '_id isConnected username displayName' },
+    { path: 'host', select: '_id' },
+  ];
+
   Game.findById(gameId)
-    .populate('users', '_id isConnected username displayName')
+    .populate(populate)
     .select('-roles')
     .exec()
     .then(game => {
