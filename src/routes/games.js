@@ -6,12 +6,12 @@ const emitter = require('../events/emitter');
 
 const router = express.Router();
 
-router.get('/', (_, res) => {
-  const populate = [
-    { path: 'users', select: '_id isConnected username displayName' },
-    { path: 'host', select: '_id' },
-  ];
+const populate = [
+  { path: 'users', select: '_id isConnected username displayName' },
+  { path: 'host', select: '_id' },
+];
 
+router.get('/', (_, res) => {
   Game.find()
     .populate(populate)
     .select('-roles')
@@ -27,11 +27,6 @@ router.get('/', (_, res) => {
 
 router.get('/:gameId', (req, res) => {
   const { gameId } = req.params;
-
-  const populate = [
-    { path: 'users', select: '_id isConnected username displayName' },
-    { path: 'host', select: '_id' },
-  ];
 
   Game.findById(gameId)
     .populate(populate)
@@ -88,9 +83,9 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:gameId/restart', (req, res) => {
-  const { gameId } = req.body;
+  const { gameId } = req.params;
   
-  Game.findById(gameId).populate('users').exec()
+  Game.findById(gameId).populate(populate).exec()
     .then(game => {
       if (!game) throw new Error('Game not found!');
 
@@ -109,7 +104,7 @@ router.put('/:gameId/restart', (req, res) => {
 router.delete('/:gameId', (req, res) => {
   const { gameId } = req.params;
 
-  Game.findById(gameId).populate('users host').exec()
+  Game.findById(gameId).populate(populate).exec()
     .then(game => Promise.all([
       game,
       ...game.users.map(u => u.setGameConnection(null)),
