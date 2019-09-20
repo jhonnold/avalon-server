@@ -77,4 +77,21 @@ router.post('/', (req, res) => {
     });
 });
 
+router.delete('/:gameId', (req, res) => {
+  const { gameId } = req.params;
+
+  Game.findById(gameId).populate('users host').exec()
+    .then(game => Promise.all([
+      game,
+      ...game.users.map(u => u.setGameConnection(null)),
+    ]))
+    .then(([game]) => game.remove())
+    .then(game => res.status(200).send(game))
+    .catch(err => {
+      log.error(err);
+
+      res.sendStatus(500);
+    });
+});
+
 module.exports = router;

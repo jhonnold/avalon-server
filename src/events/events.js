@@ -61,5 +61,10 @@ module.exports = () => {
         io.emit('game started', game);
       })
       .catch(log.error);
-  })
+  });
+
+  emitter.on('game ended', (gameId) => {
+    log('Game Ended --', gameId);
+    io.emit('game ended', { _id: gameId });
+  });
 };
