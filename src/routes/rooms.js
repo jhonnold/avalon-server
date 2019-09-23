@@ -36,6 +36,7 @@ router.post('/', async (req, res) => {
     const room = new Room({ name, host: req.user });
     await room.save();
 
+    req.io.emit('room updated', room);
     res.status(201).send(room);
   } catch (error) {
     log.error(error);
@@ -51,6 +52,8 @@ router.delete('/:roomId', async (req, res) => {
     if (!room) res.status(404).send({ error: 'Not found!' });
 
     await room.remove();
+
+    req.io.emit('room deleted', room);
     res.status(200).send(room);
   } catch (error) {
     log.error(error);

@@ -3,7 +3,6 @@ const express = require('express');
 const Game = require('../models/game');
 const Room = require('../models/room');
 const { requiredInfo } = require('../util/roles');
-const emitter = require('../events/emitter');
 
 const router = express.Router();
 
@@ -14,7 +13,9 @@ const populate = [
 
 router.get('/', async (_, res) => {
   try {
-    const games = await Game.find().populate(populate).select('-roles').exec();
+    const games = await Game.find({ active: true })
+      .populate(populate).select('-roles').exec();
+
     res.status(200).send(games);
   } catch (error) {
     log.error(error);
@@ -26,7 +27,9 @@ router.get('/:gameId', async (req, res) => {
   const { gameId } = req.params;
 
   try {
-    const game = await Game.findById(gameId).populate(populate).select('-roles').exec();
+    const game = await Game.findById(gameId)
+      .populate(populate).select('-roles').exec();
+
     if (!game) throw new Error({ error: 'Not Found!' });
 
     res.status(200).send(game);
@@ -40,7 +43,9 @@ router.get('/:gameId/me', async (req, res) => {
   const { gameId } = req.params;
 
   try {
-    const game = await Game.findById(gameId).populate(populate).exec();
+    const game = await Game.findById(gameId)
+      .populate(populate).exec();
+
     if (!game) throw new Error({ error: 'Not Found!' });
 
     const info = requiredInfo(req.user._id, game.roles, game.users);
@@ -56,14 +61,16 @@ router.post('/', async (req, res) => {
   if (!roomId) return res.status(400).send('roomId is required!');
 
   try {
-    const room = await Room.findById(roomId).populate('host users').exec();
-    if (!room) return res.status(404).send({ error: 'Room not found!' });
+    const room = await Room.findById(roomId)
+      .populate('host users').exec();
+
+    if (!room) return res.status(400).send({ error: 'Room does not exist!' });
 
     const game = await Game.fromRoom(room);
     await Promise.all(game.users.map(u => u.setGameConnection(game._id)));
     await room.remove();
-    
-    emitter.emit('game started', game._id);
+
+    req.io.emit('game started', game);
     res.status(201).send(game);
   } catch (error) {
     log.error(error);
@@ -71,31 +78,42 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:gameId/restart', async (req, res) => {
-  const { gameId } = req.params;
+router.post('/restart', async (req, res) => {
+  const { gameId } = req.body;
+  if (!gameId) return res.status(400).send({ error: 'gameId is required!' });
 
   try {
     const game = await Game.findById(gameId).populate(populate).exec();
-    if (!game) throw new Error({ error: 'Not Found!' });
+    if (!game) return res.status(400).send({ error: 'game does not exist!' });
 
-    await game.restart();
-    emitter.emit('game restarted', game._id);
+    const newGame = await Game.fromGame(game);
+    await Promise.all(game.users.map(u => u.setGameConnection(newGame._id)));
+
+    game.active = false;
+    await game.save();
+
+    req.io.emit('game restarted', { _id: newGame._id, fromId: game._id });
+    res.sendStatus(204);
   } catch (error) {
     log.error(error);
     res.sendStatus(500);
   }
 });
 
-router.delete('/:gameId', async (req, res) => {
+router.put('/:gameId/end', async (req, res) => {
   const { gameId } = req.params;
 
   try {
     const game = await Game.findById(gameId).populate(populate).exec();
     if (!game) return res.status(404).send({ error: 'Not found!' });
 
+    game.active = false;
+    await game.save();
+    
     await Promise.all(game.users.map(u => u.setGameConnection(null)));
-    await game.remove();
-    res.sendStatus(200);
+
+    req.io.emit('game ended', game);
+    res.sendStatus(204);
   } catch (error) {
     log.error(error);
     res.sendStatus(500);

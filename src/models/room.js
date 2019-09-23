@@ -1,5 +1,4 @@
 const { model, Schema } = require('mongoose');
-const emitter = require('../events/emitter');
 
 const roomSchema = new Schema({
   name: String,
@@ -11,14 +10,6 @@ const roomSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'User',
   }],
-});
-
-roomSchema.post('save', function (doc) {
-  emitter.emit('room updated', doc._id);
-});
-
-roomSchema.post('remove', function (doc) {
-  emitter.emit('room deleted', doc._id);
 });
 
 roomSchema.methods.addUser = function (user) {

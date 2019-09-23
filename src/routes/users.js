@@ -59,6 +59,7 @@ router.put('/join-room', auth, async (req, res) => {
     await user.setRoomConnection(room);
     await room.addUser(user);
     
+    req.io.emit('room updated', room);
     res.status(200).send(user);
   } catch (error) {
     log.error(error);
@@ -76,6 +77,7 @@ router.put('/leave-room', auth, async (req, res) => {
     const room = await Room.findById(roomConnection).exec();
     await room.removeUser(user);
 
+    req.io.emit('room updated', room);
     res.status(200).send(user);
   } catch (error) {
     log.error(error);

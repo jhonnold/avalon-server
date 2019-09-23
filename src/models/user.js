@@ -28,12 +28,14 @@ userSchema.methods.generateToken = function () {
 userSchema.methods.setGameConnection = function (game) {
   this.roomConnection = null;
   this.gameConnection = game;
+
   return this.save();
 }
 
 userSchema.methods.setRoomConnection = function (room) {
   this.roomConnection = room;
   this.gameConnection = null;
+  
   return this.save();
 }
 
