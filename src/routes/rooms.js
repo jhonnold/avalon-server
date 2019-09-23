@@ -4,58 +4,58 @@ const Room = require('../models/room');
 
 const router = express.Router();
 
-router.get('/', (_, res) => {
-  Room.find().exec()
-    .then(rooms => Promise.all(rooms.map(r => r.serialize())))
-    .then(serializedRooms => {
-      res.status(200).send(serializedRooms);
-    })
-    .catch(error => {
-      log.error(error);
-      res.sendStatus(500);
-    });
+router.get('/', async (_, res) => {
+  try {
+    const rooms = await Room.find().populate('users').exec()
+    res.status(200).send(rooms);
+  } catch (error) {
+    log.error(error);
+    res.sendStatus(500);
+  }
 });
 
-router.get('/:roomId', (req, res) => {
+router.get('/:roomId', async (req, res) => {
   const { roomId } = req.params;
-  
-  Room.findById(roomId).populate('host').exec()
-    .then(room => room.serialize())
-    .then(serializedRoom => {
-      res.status(200).send(serializedRoom);
-    })
-    .catch(error => {
-      log.error(error);
-      res.sendStatus(500);
-    });
+
+  try {
+    const room = await Room.findById(roomId).populate('host users').exec();
+    if (!room) res.status(404).send({ error: 'Not found!' });
+
+    res.status(200).send(room);
+  } catch (error) {
+    log.error(error);
+    res.sendStatus(500);
+  }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name } = req.body;
   if (!name) return res.status(400).send('name is required!');
 
-  const room = new Room({ name, host: req.user });
-  room.save()
-    .then(room => room.serialize())
-    .then(room => {
-      res.status(201).send(room);
-    })
-    .catch(error => {
-      log.error(error);
-      res.sendStatus(500);
-    });
+  try {
+    const room = new Room({ name, host: req.user });
+    await room.save();
+
+    res.status(201).send(room);
+  } catch (error) {
+    log.error(error);
+    res.sendStatus(500);
+  }
 });
 
-router.delete('/:roomId', (req, res) => {
+router.delete('/:roomId', async (req, res) => {
   const { roomId } = req.params;
 
-  Room.findById(roomId).exec()
-    .then(room => room.remove())
-    .then(room => res.status(200).send(room))
-    .catch(error => {
-      log.error(error);
-      res.sendStatus(500);
-    });
+  try {
+    const room = await Room.findById(roomId).exec();
+    if (!room) res.status(404).send({ error: 'Not found!' });
+
+    await room.remove();
+    res.status(200).send(room);
+  } catch (error) {
+    log.error(error);
+    res.sendStatus(500);
+  }
 });
 
 module.exports = router;

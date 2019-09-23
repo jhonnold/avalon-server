@@ -6,42 +6,42 @@ const Game = require('../models/game');
 const User = require('../models/user');
 
 module.exports = () => {
-  emitter.on('user connected', (id, client) => {
+  emitter.on('user connected', async (id, client) => {
+    try {
+      const user = await User.findById(id).exec();
+      if (!user) throw new Error('Connected user unknown!');
 
-    User.findById(id).exec()
-      .then(user => {
-        if (!user) throw new Error();
+      log('User Connected --', user._id, '--', user.displayName);
 
-        log('User Connected --', user._id, '--', user.displayName);
+      user.isConnected = true;
+      await user.save();
 
-        user.isConnected = true;
-        return user.save();
-      })
-      .then(user => {
-        client.on('disconnect', () => {
-          log('User Disconnected --', user._id, '--', user.displayName);
+      client.on('disconnect', () => {
+        log('User Disconnected --', user._id, '--', user.displayName);
 
-          user.isConnected = false;
-          return user.save();
-        })
-      })
-      .catch(client.disconnect);
+        user.isConnected = false;
+        user.save();
+      });
+    } catch (error) {
+      log.error(error);
+
+      client.disconnect();
+    }
   });
 
-  emitter.on('room updated', (roomId) => {
+  emitter.on('room updated', async (roomId) => {
     if (roomId === null) return;
+    
+    try {
+      const room = await Room.findById(roomId).populate('host users').exec();
 
-    Room.findById(roomId).populate('host').exec()
-      .then(room => {
-        if (!room) throw new Error('Room not found!');
-
-        return room.serialize();
-      })
-      .then(room => {
-        log('Room Updated --', room._id, '--', room.name);
-        io.emit('room updated', room);
-      })
-      .catch(log.error);
+      if (!room) throw new Error('Room not found!');
+        
+      log('Room Updated --', room._id, '--', room.name);
+      io.emit('room updated', room);
+    } catch (error) {
+      log.error(error);
+    }
   });
 
   emitter.on('room deleted', (roomId) => {
@@ -49,18 +49,19 @@ module.exports = () => {
     io.emit('room deleted', { _id: roomId });
   });
 
-  emitter.on('game started', (gameId) => {
-    Game.findById(gameId)
-      .populate('users', '_id isConnected username displayName')
-      .select('-roles')
-      .exec()
-      .then(game => {
-        if (!game) throw new Error();
+  emitter.on('game started', async (gameId) => {
+    try {
+      const game = await Game.findById(gameId)
+        .populate('users', '_id isConnected username displayName')
+        .select('-roles').exec();
 
-        log('Game Started --', game._id, '--', game.name)
-        io.emit('game started', game);
-      })
-      .catch(log.error);
+      if (!game) throw new Error('Game not found!');
+
+      log('Game Started --', game._id, '--', game.name)
+      io.emit('game started', game);
+    } catch (error) {
+      log.error(error);
+    }
   });
 
   emitter.on('game ended', (gameId) => {

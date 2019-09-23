@@ -22,17 +22,17 @@ module.exports = {
     const role = roleMap[id];
 
     const mordredId = _.findKey(roleMap, o => o === 'Mordred');
-    const mordred = _.get(_.find(users, ['_id', mordredId]), 'displayName', 'Nobody');
-
+    const mordred = _.get(_.find(users, u => u._id == mordredId), 'displayName', 'Nobody');
+    
     const morganaId = _.findKey(roleMap, o => o === 'Morgana');
-    const morgana = _.get(_.find(users, ['_id', morganaId]), 'displayName', 'Nobody');
-
+    const morgana = _.get(_.find(users, u => u._id == morganaId), 'displayName', 'Nobody');
+    
     const assassinId = _.findKey(roleMap, o => o === 'Assassin');
-    const assassin = _.get(_.find(users, ['_id', assassinId]), 'displayName', 'Nobody');
-
+    const assassin = _.get(_.find(users, u => u._id == assassinId), 'displayName', 'Nobody');
+    
     const merlinId = _.findKey(roleMap, o => o === 'Merlin');
-    const merlin = _.get(_.find(users, ['_id', merlinId]), 'displayName', 'Nobody');
-
+    const merlin = _.get(_.find(users, u => u._id == merlinId), 'displayName', 'Nobody');
+    
     switch (role) {
       case 'Vanilla Good': {
         return {

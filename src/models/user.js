@@ -1,44 +1,23 @@
 const { model, Schema } = require('mongoose');
-const shortid = require('shortid');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
-const emitter = require('../events/emitter');
 
 const userSchema = new Schema({
-  _id: { type: String, default: shortid.generate },
   username: { type: String, index: { unique: true }, required: true },
   password: { type: String, required: true },
   displayName: { type: String, required: true },
   isConnected: { type: Boolean, default: false },
-  roomConnection: { type: String, default: null },
-  gameConnection: { type: String, default: null },
+  roomConnection: { type: Schema.Types.ObjectId, ref: 'Room' },
+  gameConnection: { type: Schema.Types.ObjectId, ref: 'Game' },
 });
 
-userSchema.post('init', function () {
-  this._db = this.toObject();
-});
-
-userSchema.pre('save', function (next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
 
-  bcrypt.hash(this.password, 8)
-    .then(password => {
-      this.password = password;
-      next();
-    });
-});
+  const password = await bcrypt.hash(this.password, 8);
+  this.password = password;
 
-userSchema.post('save', function (doc) {
-  if (!doc._db) doc._db = doc.toObject();
-
-  if (doc._db.isConnected != doc.isConnected) {
-    emitter.emit('room updated', doc.roomConnection);
-  }
-
-  if (doc._db.roomConnection != doc.roomConnection) {
-    emitter.emit('room updated', doc._db.roomConnection);
-    emitter.emit('room updated', doc.roomConnection);
-  }
+  next();
 });
 
 userSchema.methods.generateToken = function () {
@@ -58,18 +37,14 @@ userSchema.methods.setRoomConnection = function (room) {
   return this.save();
 }
 
-userSchema.statics.login = function (username, password) {
-  return User.findOne({ username }).exec()
-    .then(user => {
-      if (!user) throw new Error('Unknown user!');
+userSchema.statics.login = async function (username, password) {
+  const user = await User.findOne({ username }).exec();
+  if (!user) throw new Error('Unknown user!');
 
-      return Promise.all([bcrypt.compare(password, user.password), user]);
-    })
-    .then(([isCorrect, user]) => {
-      if (!isCorrect) throw new Error('Incorrect Password!');
+  const isCorrect = await bcrypt.compare(password, user.password);
+  if (!isCorrect) throw new Error('Incorrect password!');
 
-      return user;
-    });
+  return user;
 };
 
 const User = model('User', userSchema);

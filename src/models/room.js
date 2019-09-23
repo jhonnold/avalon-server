@@ -1,34 +1,38 @@
 const { model, Schema } = require('mongoose');
-const shortid = require('shortid');
-const User = require('./user');
 const emitter = require('../events/emitter');
 
 const roomSchema = new Schema({
-  _id: { type: String, default: shortid.generate },
   name: String,
   host: {
     type: Schema.Types.ObjectId,
     ref: 'User',
   },
+  users: [{
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  }],
 });
 
 roomSchema.post('save', function (doc) {
   emitter.emit('room updated', doc._id);
 });
 
-roomSchema.post(/remove/, function (doc) {
+roomSchema.post('remove', function (doc) {
   emitter.emit('room deleted', doc._id);
 });
 
-roomSchema.methods.serialize = function () {
-  return User.find({ roomConnection: this._id })
-    .select('_id isConnected username displayName')
-    .exec()
-    .then(users => ({
-      ...this.toObject(),
-      users,
-    }));
-};
+roomSchema.methods.addUser = function (user) {
+  this.users.addToSet(user._id);
+  return this.save();
+}
+
+roomSchema.methods.removeUser = function (user) {
+  this.users.pull(user._id);
+  if (this.users.length === 0) return this.remove();
+  
+  if (this.host.equals(user)) this.host = this.users[0];
+  return this.save();
+}
 
 const Room = model('Room', roomSchema);
 
