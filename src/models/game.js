@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const { model, Schema } = require('mongoose');
 const { roleGenerator } = require('../util/roles');
 
@@ -7,6 +8,14 @@ const gameSchema = new Schema({
   users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   roles: { type: Map, of: String },
   active: { type: Boolean, default: true },
+  missions: {
+    type: [{ type: Boolean }],
+    default: [null, null, null, null, null],
+  },
+});
+
+gameSchema.virtual('currentMission').get(function () {
+  return _.findIndex(this.missions, r => r === null);
 });
 
 gameSchema.statics.fromRoom = async function (room) {
@@ -37,6 +46,7 @@ gameSchema.statics.fromGame = async function (oldGame) {
   return game.populate('users host').execPopulate();
 };
 
+gameSchema.set('toJSON', { virtuals: true });
 const Game = model('Game', gameSchema);
 
 module.exports = Game;

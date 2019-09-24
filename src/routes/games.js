@@ -100,6 +100,26 @@ router.post('/restart', async (req, res) => {
   }
 });
 
+router.put('/:gameId/mission-result', async (req, res) => {
+  const { gameId } = req.params;
+  const { result } = req.body;
+  if (!result) return res.status(400).send({ error: 'Result is required!' });
+
+  try {
+    const game = await Game.findById(gameId).populate(populate).exec();
+    if (!game) return res.status(404).send({ error: 'Not found!' });
+
+    game.missions[game.currentMission] = !!result;
+    await game.save();
+
+    req.io.emit('game updated', game);
+    res.status(200).send(game);
+  } catch (error) {
+    log.error(error);
+    res.sendStatus(500);
+  }
+});
+
 router.put('/:gameId/end', async (req, res) => {
   const { gameId } = req.params;
 
