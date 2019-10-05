@@ -12,10 +12,6 @@ const gameSchema = new Schema({
   missions: [{ type: Schema.Types.ObjectId, ref: 'Mission' }],
 });
 
-gameSchema.virtual('currentMission').get(function () {
-  return _.findIndex(this.missions, r => r === null);
-});
-
 gameSchema.statics.fromRoom = async function (room) {
   const users = room.users.map(u => u._id);
   const roles = roleGenerator(users);

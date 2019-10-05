@@ -20,6 +20,27 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+router.patch('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        let mission = await Mission.findById(id).exec();
+        if (!mission) return res.status(404).send({ error: 'Mission not found!' });
+
+        mission = { ...mission, ...req.body };
+        await mission.save();
+        
+        await mission.populate('users').execPopulate();
+
+        req.io.emit('mission updated', mission);
+        res.status(200).send(mission);
+    } catch (error) {
+        log.error(error);
+
+        res.sendStatus(500);
+    }
+});
+
 router.post('/:id/action', async (req, res) => {
     const { id } = req.params;
     const { action } = req.body;
