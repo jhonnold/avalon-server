@@ -9,7 +9,7 @@ const router = express.Router();
 const populate = [
   { path: 'users', select: '_id isConnected username displayName' },
   { path: 'host', select: '_id' },
-  { path: 'missions', select: '_id failsRequired userRequired users numberOfFails result' },
+  { path: 'missions', select: '_id failsRequired usersRequired users numberOfFails result userActions' },
 ];
 
 router.get('/', async (_, res) => {

@@ -6,21 +6,19 @@ const missionSchema = new Schema({
     failsRequired: { type: Number, default: 1 },
     usersRequired: Number,
     users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    userActions: { type: Map, of: Boolean },
+    userActions: { type: Map, of: Boolean, default: {} },
 });
 
 missionSchema.virtual('numberOfFails').get(function() {
-    const actions = this.userActions.values();
-    if (actions.length < this.usersRequired) return 0;
+    if (this.userActions.size < this.usersRequired) return 0;
 
-    return _.countBy(actions)['false'];
+    return _.countBy([...this.userActions.values()])['false'] || 0;
 });
 
 missionSchema.virtual('result').get(function() {
-    const actions = this.userActions.values();
-    if (actions.length < this.usersRequired) return null;
+    if (this.userActions.size < this.usersRequired) return null;
 
-    return _.countBy(actions)['false'] >= this.failsRequired; 
+    return _.get(_.countBy([...this.userActions.values()]), 'false', 0) < this.failsRequired; 
 });
 
 missionSchema.statics.createForCount = async function (size) {
@@ -28,6 +26,7 @@ missionSchema.statics.createForCount = async function (size) {
         failsRequired: i === 3 && size > 6 ? 2 : 1,
         usersRequired: m,
         users: _.times(m, _.constant(null)),
+        userActions: {},
       }));
     
       await Promise.all(missions.map(m => m.save()));

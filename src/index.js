@@ -23,6 +23,7 @@ app.use((req, _, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/rooms', auth, require('./routes/rooms'));
 app.use('/games', auth, require('./routes/games'));
+app.use('/missions', auth, require('./routes/missions'));
 
 server.listen(8080, () => {
   db.connect();
