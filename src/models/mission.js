@@ -6,21 +6,21 @@ const missionSchema = new Schema({
     failsRequired: { type: Number, default: 1 },
     usersRequired: Number,
     users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    userVotes: { type: Map, of: Boolean },
+    userActions: { type: Map, of: Boolean },
 });
 
 missionSchema.virtual('numberOfFails').get(function() {
-    const votes = this.userVotes.values();
-    if (votes.length < this.usersRequired) return 0;
+    const actions = this.userActions.values();
+    if (actions.length < this.usersRequired) return 0;
 
-    return _.countBy(votes)['false'];
+    return _.countBy(actions)['false'];
 });
 
 missionSchema.virtual('result').get(function() {
-    const votes = this.userVotes.values();
-    if (votes.length < this.usersRequired) return null;
+    const actions = this.userActions.values();
+    if (actions.length < this.usersRequired) return null;
 
-    return _.countBy(votes)['false'] >= this.failsRequired; 
+    return _.countBy(actions)['false'] >= this.failsRequired; 
 });
 
 missionSchema.statics.createForCount = async function (size) {
