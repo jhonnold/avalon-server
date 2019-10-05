@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const { model, Schema } = require('mongoose');
+const missionCount = require('../util/missionCount');
 
 const missionSchema = new Schema({
     failsRequired: { type: Number, default: 1 },
@@ -21,6 +22,18 @@ missionSchema.virtual('result').get(function() {
 
     return _.countBy(votes)['false'] >= this.failsRequired; 
 });
+
+missionSchema.statics.createForCount = async function (size) {
+    const missions = missionCount(size).map((m, i) => new Mission({
+        failsRequired: i === 3 && size > 6 ? 2 : 1,
+        usersRequired: m,
+        users: _.times(m, _.constant(null)),
+      }));
+    
+      await Promise.all(missions.map(m => m.save()));
+
+      return missions.map(m => m._id);
+}
 
 missionSchema.set('toJSON', { virtuals: true });
 const Mission = model('Mission', missionSchema);
