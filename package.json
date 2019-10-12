@@ -12,8 +12,7 @@
   },
   "devDependencies": {
     "eslint": "^6.2.1",
-    "nodemon": "^1.19.1",
-    "redux-logger": "^3.0.6"
+    "nodemon": "^1.19.1"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -25,8 +24,10 @@
     "lodash": "^4.17.15",
     "mongoose": "^5.7.1",
     "morgan": "^1.9.1",
+    "on-finished": "^2.3.0",
     "redux": "^4.0.4",
     "shortid": "^2.2.14",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.2.0",
+    "winston": "^3.2.1"
   }
 }

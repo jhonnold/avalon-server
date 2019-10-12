@@ -1,4 +1,4 @@
-const { logger } = require('../util');
+const log = require('fancy-log');
 const socketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -16,14 +16,14 @@ io.on('connect', async (client) => {
   await user.save();
 
   io.emit('user updated', user);
-  logger.info(`User Connected -- ${user.displayName}`);
+  log(`User Updated -- ${user._id} -- ${user.displayName}`);
   
   client.on('disconnect', async () => {
     user.isConnected = false;
     await user.save();
     
     io.emit('user updated', user);
-    logger.info(`User Disconnected -- ${user.displayName}`);
+    log(`User Updated -- ${user._id} -- ${user.displayName}`);
   });
 });
 

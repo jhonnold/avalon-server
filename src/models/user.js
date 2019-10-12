@@ -7,8 +7,7 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   displayName: { type: String, required: true },
   isConnected: { type: Boolean, default: false },
-  roomConnection: { type: Schema.Types.ObjectId, ref: 'Room' },
-  gameConnection: { type: Schema.Types.ObjectId, ref: 'Game' },
+  game: { type: Schema.Types.ObjectId, ref: 'Game' },
 });
 
 userSchema.pre('save', async function (next) {
@@ -25,20 +24,6 @@ userSchema.methods.generateToken = function () {
   return token;
 };
 
-userSchema.methods.setGameConnection = function (game) {
-  this.roomConnection = null;
-  this.gameConnection = game;
-
-  return this.save();
-}
-
-userSchema.methods.setRoomConnection = function (room) {
-  this.roomConnection = room;
-  this.gameConnection = null;
-  
-  return this.save();
-}
-
 userSchema.statics.login = async function (username, password) {
   const user = await User.findOne({ username }).exec();
   if (!user) throw new Error('Unknown user!');
@@ -50,5 +35,4 @@ userSchema.statics.login = async function (username, password) {
 };
 
 const User = model('User', userSchema);
-
 module.exports = User;
