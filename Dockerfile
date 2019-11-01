@@ -2,9 +2,9 @@ FROM node:10
 WORKDIR /app
 
 COPY package.json .
-COPY yarn.lock .
+COPY package-lock.json .
 
-RUN yarn install
+RUN npm install
 COPY . .
 
-CMD ["yarn", "start"]
+CMD ["npm", "start"]
