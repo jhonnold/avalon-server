@@ -25,8 +25,8 @@ app.use('/rooms', auth, require('./routes/rooms'));
 app.use('/games', auth, require('./routes/games'));
 app.use('/missions', auth, require('./routes/missions'));
 
-server.listen(8080, () => {
+server.listen(10000, () => {
   db.connect();
 
-  log('Started listening on port 8080!');
+  log('Started listening on port 10000!');
 });
